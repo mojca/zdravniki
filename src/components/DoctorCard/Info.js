@@ -1,36 +1,38 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { CardContent, Typography, Tooltip, IconButton, Stack } from '@mui/material';
 import slugify from 'slugify';
 
+import { useLeafletContext } from 'context/leafletContext';
 import * as Icons from 'components/Shared/Icons';
 import SingleChart from 'components/Shared/CircleChart';
+import { t } from 'i18next';
 import Accepts from './Accepts';
 import * as Styled from './styles';
 import * as Shared from './Shared';
 
-import { DoctorTypeTranslate } from './dicts';
 import { toPercent } from './utils';
 
 const Info = function Info({ doctor, handleZoom = () => {} }) {
-  const lng = localStorage.getItem('i18nextLng') || 'sl';
+  const { lng } = useParams();
+  const { map } = useLeafletContext();
   const accepts = doctor.accepts === 'y';
   const availabilityText = toPercent(doctor.availability, lng);
 
   const navigate = useNavigate();
-  const handleDoctorCard = type => {
-    const drPath = DoctorTypeTranslate?.[type];
-    if (!drPath) {
-      return undefined;
-    }
 
-    const slug = slugify(doctor?.name?.toLowerCase());
-    const path = `/${lng}/${drPath}/${slug}`;
-    // todo pass filters' state as second argument
-    return navigate(path);
+  const drPath = doctor?.type;
+  const slug = slugify(doctor?.name?.toLowerCase());
+  let path = `/${lng}/${drPath}/${slug}`;
+  const handleDoctorCard = (event, isReportError) => {
+    event.preventDefault();
+    if (isReportError) {
+      path = `/${lng}/${drPath}/${slug}/edit`;
+    }
+    return navigate(path, { state: { zoom: map?.getZoom(), center: map?.getCenter() } });
   };
 
   return (
-    <CardContent>
+    <CardContent sx={{ padding: `0 !important` }}>
       <Typography component="h2" variant="h2">
         {doctor.name}
       </Typography>
@@ -61,19 +63,28 @@ const Info = function Info({ doctor, handleZoom = () => {} }) {
         <Stack direction="row" alignItems="center" spacing={1}>
           {doctor.phone && (
             <Tooltip title={doctor.phone}>
-              <IconButton>
-                <Shared.Link href={`tel:${doctor.phone}`} self>
+              <Shared.Link href={`tel:${doctor.phone}`} self>
+                <IconButton>
                   <Icons.Icon name="Phone" />
-                </Shared.Link>
-              </IconButton>
+                </IconButton>
+              </Shared.Link>
             </Tooltip>
           )}
           <IconButton onClick={handleZoom}>
             <Icons.Icon name="MapMarker" />
           </IconButton>
-          <IconButton onClick={() => handleDoctorCard(doctor.type)}>
-            <Icons.Icon name="IdCard" />
-          </IconButton>
+          {path && (
+            <Shared.LinkNoRel href={path} onClick={e => handleDoctorCard(e, false)}>
+              <IconButton>
+                <Icons.Icon name="IdCard" />
+              </IconButton>
+            </Shared.LinkNoRel>
+          )}
+          <Tooltip title={t('reportError.tooltip')}>
+            <IconButton onClick={e => handleDoctorCard(e, true)}>
+              <Icons.Icon name="ReportError" />
+            </IconButton>
+          </Tooltip>
         </Stack>
       </Stack>
     </CardContent>

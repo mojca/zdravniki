@@ -10,6 +10,8 @@ export const Main = styled('main')(() => ({
 
 export const Box = styled(MuiBox)(({ theme }) => ({
   overflow: 'hidden',
+  position: 'relative',
+  zIndex: 1,
   '& .leaflet-container': {
     height: SIZES.MAP_HEIGHT.default,
   },
@@ -20,7 +22,7 @@ export const Box = styled(MuiBox)(({ theme }) => ({
   },
   [theme.breakpoints.up('md')]: {
     '& .leaflet-container': {
-      height: 'clamp(400px, 100%, 100vh)', // ? not sure but it's working
+      height: SIZES.MAP_HEIGHT.upMedium,
     },
   },
 }));

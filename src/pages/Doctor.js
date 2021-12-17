@@ -1,48 +1,58 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import slugify from 'slugify';
 import Box from '@mui/material/Box';
 
 import DoctorCard from 'components/DoctorCard';
 import { Loader } from 'components/Shared';
 
-import { useFilter } from 'context/filterContext';
 import { leafletContext } from 'context';
+import { useDoctors } from 'context/doctorsContext';
+import FooterInfoCard from '../components/Shared/FooterInfo';
 
-const Doctor = function Doctor() {
-  const { allDoctors } = useFilter();
-  const { priimekIme } = useParams();
+const Doctor = function Doctor({ isReportError = false }) {
+  const { doctors } = useDoctors();
+  const { lng, name } = useParams();
   const [doctor, setDoctor] = useState();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    allDoctors?.find(aDoctor => {
-      if (slugify(aDoctor.name.toLowerCase()) === priimekIme) {
-        setDoctor(aDoctor);
-      }
-      return null;
-    });
-  }, [allDoctors, priimekIme]);
+    setDoctor(doctors?.all.find(d => slugify(d.name.toLowerCase()) === name));
+  }, [doctors, doctor, lng, name]);
 
-  return (
-    <Box
-      id="main-content"
-      component="main"
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: { md: 'calc(100vh - 64px)' },
-      }}
-    >
-      {doctor ? (
+  useEffect(() => {
+    if (loading) {
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+    }
+  }, [loading]);
+
+  if (doctor) {
+    return (
+      <Box
+        id="main-content"
+        component="main"
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: 'calc(100% - 48px)',
+          margin: '24px',
+          height: { md: 'calc(100vh - 64px)' },
+        }}
+      >
         <leafletContext.LeafletProvider>
-          <DoctorCard doctor={doctor} isPage />
+          <DoctorCard doctor={doctor} isPage isReportError={isReportError} />
+          <FooterInfoCard isDrPage />
         </leafletContext.LeafletProvider>
-      ) : (
-        <Loader.Center />
-      )}
-    </Box>
-  );
+      </Box>
+    );
+  }
+  if (loading) {
+    return <Loader.Center />;
+  }
+  return <Navigate to={`/${lng}/404`} />;
 };
 
 export default Doctor;

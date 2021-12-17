@@ -1,5 +1,6 @@
 import { t } from 'i18next';
 import * as Icons from 'components/Shared/Icons';
+import PropTypes from 'prop-types';
 
 import Typography from '@mui/material/Typography';
 import {
@@ -21,6 +22,25 @@ export const Link = function Link({ children, self, ...props }) {
     </Styled.Link>
   );
 };
+
+// ? uh, needs refactoring; somehow it feels I can join Link and LinkNoRel
+export const LinkNoRel = function LinkRegular({ href, onClick, children }) {
+  return (
+    <Styled.Link underline="none" href={href} onClick={onClick}>
+      {children}
+    </Styled.Link>
+  );
+};
+
+LinkNoRel.defaultProps = {
+  onClick: () => {},
+};
+
+LinkNoRel.propTypes = {
+  href: PropTypes.string.isRequired,
+  children: PropTypes.oneOfType([PropTypes.any]).isRequired,
+  onClick: PropTypes.func,
+};
 export const ConditionalLink = function ConditionalLink({
   children,
   to,
@@ -41,9 +61,9 @@ export const ConditionalLink = function ConditionalLink({
 };
 
 export const DoubleChip = function DoubleChip({ type, ageGroup }) {
-  const drType = TypeTranslate[type];
-  const drAgeGroup = AgeGroupTranslate?.[ageGroup] ?? 'adults';
-  const typeIcon = TypeIconTranslate[type];
+  const drType = t(TypeTranslate[type]);
+  const drAgeGroup = t(AgeGroupTranslate?.[ageGroup] ?? 'adults');
+  const typeIcon = TypeIconTranslate[type] ?? 'Family';
   const ageGroupIcon = AgeGroupIconTranslate?.[ageGroup] ?? 'Adults';
   return (
     <Styled.PageInfo.DCWrapper direction="row">
