@@ -8,6 +8,7 @@ import { Loader } from 'components/Shared';
 
 import { leafletContext } from 'context';
 import { useDoctors } from 'context/doctorsContext';
+import PropTypes from 'prop-types';
 import FooterInfoCard from '../components/Shared/FooterInfo';
 
 const Doctor = function Doctor({ isReportError = false }) {
@@ -53,6 +54,14 @@ const Doctor = function Doctor({ isReportError = false }) {
     return <Loader.Center />;
   }
   return <Navigate to={`/${lng}/404`} />;
+};
+
+Doctor.propTypes = {
+  isReportError: PropTypes.bool,
+};
+
+Doctor.defaultProps = {
+  isReportError: false,
 };
 
 export default Doctor;
